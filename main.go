@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var bind = flag.String("bind", "127.0.0.1:800", "port to run the server on")
+var bind = flag.String("bind", "127.0.0.1:8000", "port to run the server on")
 var dir = flag.String("dir", ".", "server root directory")
 
 func main() {
