@@ -63,31 +63,34 @@ func (r renderer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 `, title, style)
 	var output = render_code(string(input))
 	// 展示图片
-
+	output = render_header(output)
 	output = render_img(output)
-
-	output = fmt.Sprintf("<html><head>%s</head><body><div><pre>%s</pre></div></body><script>%s</script></html>", head, output, script)
+	output = render_link(output)
+	output = fmt.Sprintf("<html><head>%s</head><body><div><p>%s</p></div></body><script>%s</script></html>", head, output, script)
 	fmt.Fprint(rw, output)
+}
+func render_header(html string) string {
+	var re = regexp.MustCompile("(?s)---\r?\n(.*?)\r?\n---")
+	return re.ReplaceAllString(html, `</p><pre>$1</pre><hr><p>`)
 }
 
 // 渲染代码块
 func render_code(html string) string {
-
 	var re = regexp.MustCompile("(?s)```([a-z]+)\r?\n(.*?)\r?\n```")
-	html = re.ReplaceAllString(html, `</pre><pre><code class="language-$1">$2</code></pre><pre>`)
+	html = re.ReplaceAllString(html, `</p><pre><code class="language-$1">$2</code></pre><p>`)
 	re = regexp.MustCompile("(?s)```\r?\n(.*?)\r?\n```")
-	return re.ReplaceAllString(html, `</pre><pre><code class="language-plaintext">$1</code></pre><pre>`)
+	return re.ReplaceAllString(html, `</p><pre><code class="language-plaintext">$1</code></pre><p>`)
 }
 
 func render_link(html string) string {
 	// 匹配 markdown 中的图片 ![img](src/img/big.png)
-	var re = regexp.MustCompile(`\[.*?\]\((.*?)\)`)
-	return re.ReplaceAllString(html, `</pre><a href="$1"/>$1</a><pre>`)
+	var re = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`)
+	return re.ReplaceAllString(html, `<a href="$2"/>$1</a>`)
 }
 func render_img(html string) string {
 	// 匹配 markdown 中的图片 ![img](src/img/big.png)
 	var re = regexp.MustCompile(`!.*?\((.*?)\)`)
-	return re.ReplaceAllString(html, `</pre><img src="$1"/><pre>`)
+	return re.ReplaceAllString(html, `</p><img src="$1"/><p>`)
 
 }
 func get_title(html string) string {
